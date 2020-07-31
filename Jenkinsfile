@@ -40,7 +40,7 @@ node {
                 srccode = sh returnStdout: true, script : "${toolbelt}/sfdx force:source:convert -r force-app -d ./src"
             } else {
                 println(' Convert SFDC Project to normal project')
-                srccode = bat returnStdout: true, script : "${toolbelt}/sfdx force:source:convert -r force-app -d ./src"
+                srccode = bat returnStdout: true, script : "${toolbelt} force:source:convert -r force-app -d ./src"
             }
             println(srccode)
         }
@@ -50,7 +50,7 @@ node {
                 deploymentStatus = sh returnStdout: true, script : "${toolbelt}/sfdx force:mdapi:deploy -d ./src -u ${HUB_ORG}"
             }else{
                 println(' Deploy the code into Scratch ORG.')
-                deploymentStatus = bat returnStdout: true, script : "${toolbelt}/sfdx force:mdapi:deploy -d ./src -u ${HUB_ORG}"
+                deploymentStatus = bat returnStdout: true, script : "${toolbelt} force:mdapi:deploy -d ./src -u ${HUB_ORG}"
             }    
 		    Boolean isDeployProcessDone = false;
             String deploySuccessful = '"status":"Succeeded"';
@@ -64,7 +64,7 @@ node {
                 if (isUnix()){
                     deploymentStatus = sh returnStdout: true, script: "${toolbelt}/sfdx force:mdapi:deploy:report -u ${HUB_ORG} --json"
                 } else {
-                    deploymentStatus = bat returnStdout: true, script: "${toolbelt}/sfdx force:mdapi:deploy:report -u ${HUB_ORG} --json"
+                    deploymentStatus = bat returnStdout: true, script: "${toolbelt} force:mdapi:deploy:report -u ${HUB_ORG} --json"
                 }
             }
 		    while(!isDeployProcessDone){
@@ -81,7 +81,7 @@ node {
                     if (isUnix()){
                         deploymentStatus = sh returnStdout: true, script: "${toolbelt}/sfdx force:mdapi:deploy:report -u ${HUB_ORG} --json"
                     } else {
-                        deploymentStatus = bat returnStdout: true, script: "${toolbelt}/sfdx force:mdapi:deploy:report -u ${HUB_ORG} --json"
+                        deploymentStatus = bat returnStdout: true, script: "${toolbelt} force:mdapi:deploy:report -u ${HUB_ORG} --json"
                     }
                 }
             }   
