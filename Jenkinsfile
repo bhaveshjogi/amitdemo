@@ -1,17 +1,7 @@
 #!groovy
-
 import groovy.json.JsonSlurperClassic
 node {
 
-<<<<<<< HEAD
-    def BUILD_NUMBER = env.BUILD_NUMBER
-    def RUN_ARTIFACT_DIR = "tests/${BUILD_NUMBER}"
-    
-    def HUB_ORG = "${params.USER_NAME}"
-    def SFDC_HOST = "${params.INSTANCE}"
-    def JWT_KEY_CRED_ID = "${params.OPENSSL_KEY}"
-    def CONNECTED_APP_CONSUMER_KEY = "${params.CONSUMER_KEY}"
-=======
     def BUILD_NUMBER=env.BUILD_NUMBER
     def RUN_ARTIFACT_DIR="tests/${BUILD_NUMBER}"
     def SFDC_USERNAME
@@ -20,91 +10,40 @@ node {
     def SFDC_HOST = env.SFDC_HOST_DH
     def JWT_KEY_CRED_ID = "59303dba-e1e7-4bc5-85d8-6a07589c3eb9"
     def CONNECTED_APP_CONSUMER_KEY=env.CONNECTED_APP_CONSUMER_KEY_DH
->>>>>>> 5448d7456472fa2dbcf2eb7823aaa5d8de62a8b1
 
-    println ('JWT_KEY_CRED_ID --' +JWT_KEY_CRED_ID)
-    println ('HUB_ORG --' +HUB_ORG)
-    println ('SFDC_HOST --' +SFDC_HOST)
-    println ('CONNECTED_APP_CONSUMER_KEY --' +CONNECTED_APP_CONSUMER_KEY)
-    
-    def toolbelt = tool 'toolbelt'    
+    println 'KEY IS' 
+    println JWT_KEY_CRED_ID
+    println HUB_ORG
+    println SFDC_HOST
+    println CONNECTED_APP_CONSUMER_KEY
+    def toolbelt = tool 'toolbelt'
 
-    stage('checkout source code ') {
+    stage('checkout source') {
+        // when running in multi-branch job, one must issue this command
         checkout scm
     }
 
     withCredentials([file(credentialsId: JWT_KEY_CRED_ID, variable: 'jwt_key_file')]) {
-        stage('Authorize ORG') {
+        stage('Deploye Code') {
             if (isUnix()) {
-                rc = sh returnStatus: true, script: "${toolbelt}/sfdx force:auth:jwt:grant --clientid ${CONNECTED_APP_CONSUMER_KEY} --username ${HUB_ORG} --jwtkeyfile ${jwt_key_file} -d --instanceurl ${SFDC_HOST}"
-            } else {
-                rc = bat returnStatus: true, script: "${toolbelt}/sfdx force:auth:jwt:grant --clientid ${CONNECTED_APP_CONSUMER_KEY} --username ${HUB_ORG} --jwtkeyfile \"${jwt_key_file}\" -d --instanceurl ${SFDC_HOST}"
-            }
-            
-            if (rc != 0) {
-                error 'hub org authorization failed'
-            }
-
-            println(rc)
-        }
-        stage('Convert Salesforce DX and Store in SRC Folder') {
-            if (isUnix()) {
-                println(' Convert SFDC Project to normal project')
-                srccode = sh returnStdout: true, script : "${toolbelt}/sfdx force:source:convert -r force-app -d ./src"
-            } else {
-                println(' Convert SFDC Project to normal project')
-                srccode = bat returnStdout: true, script : "${toolbelt}/sfdx force:source:convert -r force-app -d ./src"
-            }
-            println(srccode)
-        }
-        stage('Push To Target Org') {
-            if(isUnix()){
-                println(' Deploy the code into Scratch ORG.')
-                deploymentStatus = sh returnStdout: true, script : "${toolbelt}/sfdx force:mdapi:deploy -d ./src -u ${HUB_ORG}"
+                rc = sh returnStatus: true, script: "${toolbelt} force:auth:jwt:grant --clientid ${CONNECTED_APP_CONSUMER_KEY} --username ${HUB_ORG} --jwtkeyfile ${jwt_key_file} --setdefaultdevhubusername --instanceurl ${SFDC_HOST}"
             }else{
-<<<<<<< HEAD
-                println(' Deploy the code into Scratch ORG.')
-                deploymentStatus = bat returnStdout: true, script : "${toolbelt}/sfdx force:mdapi:deploy -d ./src -u ${HUB_ORG}"
-            }            
-            
-            Boolean isDeployProcessDone = false;
-            String deploySuccessful = '"status":"Succeeded"';
-            String deployUnsuccessful = '"status":"Failed"';
-            
-            String deployQueuedString = 'Status:  Queued';
-            while(deploymentStatus.contains(deployQueuedString)){
-                println('Deployment is queued');
-                sleep 3;
-
-                if (isUnix()){
-                    deploymentStatus = sh returnStdout: true, script: "${toolbelt}/sfdx force:mdapi:deploy:report -u ${HUB_ORG} --json"
-                } else {
-                    deploymentStatus = bat returnStdout: true, script: "${toolbelt}/sfdx force:mdapi:deploy:report -u ${HUB_ORG} --json"
-                }
-=======
                  rc = bat returnStatus: true, script: "\"${toolbelt}\" force:auth:jwt:grant --clientid ${CONNECTED_APP_CONSUMER_KEY} --username ${HUB_ORG} --jwtkeyfile \"C:\\openssl\\bin\\server.key\" --setdefaultdevhubusername --instanceurl ${SFDC_HOST}"
->>>>>>> 5448d7456472fa2dbcf2eb7823aaa5d8de62a8b1
             }
+            if (rc != 0) { error 'hub org authorization failed' }
 
-            
-            while(!isDeployProcessDone){
-                if (deploymentStatus.contains(deploySuccessful)){
-                    println('Deployment Succeeded');
-                    isDeployProcessDone = true;
-                } else if (deploymentStatus.contains(deployUnsuccessful)){
-                    println('Deployment Did Not Succeed --' +deploymentStatus);
-                    isDeployProcessDone = true;
-                    error 'Deployment Did Not Succeed'
-                } else {
-                    println('Deployment In Progress --' +deploymentStatus);
-                    sleep 5;
-                    if (isUnix()){
-                        deploymentStatus = sh returnStdout: true, script: "${toolbelt}/sfdx force:mdapi:deploy:report -u ${HUB_ORG} --json"
-                    } else {
-                        deploymentStatus = bat returnStdout: true, script: "${toolbelt}/sfdx force:mdapi:deploy:report -u ${HUB_ORG} --json"
-                    }
-                }
-            }            
+			println rc
+			
+			// need to pull out assigned username
+			if (isUnix()) {
+				rmsg = sh returnStdout: true, script: "${toolbelt} force:mdapi:deploy -d manifest/. -u ${HUB_ORG}"
+			}else{
+			   rmsg = bat returnStdout: true, script: "\"${toolbelt}\" force:mdapi:deploy -d manifest/. -u ${HUB_ORG}"
+			}
+			  
+            printf rmsg
+            println('Hello from a Job DSL script!')
+            println(rmsg)
         }
     }
 }
