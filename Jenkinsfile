@@ -50,7 +50,7 @@ node {
                 deploymentStatus = sh returnStdout: true, script : "${toolbelt}/sfdx force:mdapi:deploy -d ./src -u ${HUB_ORG}"
             }else{
                 println(' Deploy the code into Scratch ORG.')
-                deploymentStatus = bat returnStdout: true, script : "${toolbelt}/sfdx force:mdapi:deploy -d ./src -u ${HUB_ORG}"
+                deploymentStatus = bat returnStdout: true, script : "\"${toolbelt}\" force:mdapi:deploy -d ./src -u ${HUB_ORG}"
             } 
 	 }
 	    
