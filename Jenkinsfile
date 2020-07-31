@@ -51,7 +51,40 @@ node {
             }else{
                 println(' Deploy the code into Scratch ORG.')
                 deploymentStatus = bat returnStdout: true, script : "\"${toolbelt}\" force:mdapi:deploy -d ./src -u ${HUB_ORG}"
-            } 
+            }
+	Boolean isDeployProcessDone = false;
+            String deploySuccessful = '"status":"Succeeded"';
+            String deployUnsuccessful = '"status":"Failed"';
+            
+            String deployQueuedString = 'Status:  Queued';
+            while(deploymentStatus.contains(deployQueuedString)){
+                println('Deployment is queued');
+                sleep 3;
+
+                if (isUnix()){
+                    deploymentStatus = sh returnStdout: true, script: "${toolbelt}/sfdx force:mdapi:deploy:report -u ${HUB_ORG} --json"
+                } else {
+                    deploymentStatus = bat returnStdout: true, script: "\"${toolbelt}\" force:mdapi:deploy:report -u ${HUB_ORG} --json"
+                }
+            }
+	while(!isDeployProcessDone){
+                if (deploymentStatus.contains(deploySuccessful)){
+                    println('Deployment Succeeded');
+                    isDeployProcessDone = true;
+                } else if (deploymentStatus.contains(deployUnsuccessful)){
+                    println('Deployment Did Not Succeed --' +deploymentStatus);
+                    isDeployProcessDone = true;
+                    error 'Deployment Did Not Succeed'
+                } else {
+                    println('Deployment In Progress --' +deploymentStatus);
+                    sleep 5;
+                    if (isUnix()){
+                        deploymentStatus = sh returnStdout: true, script: "${toolbelt}/sfdx force:mdapi:deploy:report -u ${HUB_ORG} --json"
+                    } else {
+                        deploymentStatus = bat returnStdout: true, script: "\"${toolbelt}\" force:mdapi:deploy:report -u ${HUB_ORG} --json"
+                    }
+                }
+            }   
 	 }
 	    
     }
