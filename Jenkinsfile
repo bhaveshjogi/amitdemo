@@ -44,7 +44,15 @@ node {
             }
             println(srccode)
         }
-	   
+	 stage('Push To Target Org') {
+            if(isUnix()){
+                println(' Deploy the code into Scratch ORG.')
+                deploymentStatus = sh returnStdout: true, script : "${toolbelt}/sfdx force:mdapi:deploy -d ./src -u ${HUB_ORG}"
+            }else{
+                println(' Deploy the code into Scratch ORG.')
+                deploymentStatus = bat returnStdout: true, script : "${toolbelt}/sfdx force:mdapi:deploy -d ./src -u ${HUB_ORG}"
+            } 
+	 }
 	    
     }
 }
