@@ -3,6 +3,7 @@
 import groovy.json.JsonSlurperClassic
 node {
 
+<<<<<<< HEAD
     def BUILD_NUMBER = env.BUILD_NUMBER
     def RUN_ARTIFACT_DIR = "tests/${BUILD_NUMBER}"
     
@@ -10,6 +11,16 @@ node {
     def SFDC_HOST = "${params.INSTANCE}"
     def JWT_KEY_CRED_ID = "${params.OPENSSL_KEY}"
     def CONNECTED_APP_CONSUMER_KEY = "${params.CONSUMER_KEY}"
+=======
+    def BUILD_NUMBER=env.BUILD_NUMBER
+    def RUN_ARTIFACT_DIR="tests/${BUILD_NUMBER}"
+    def SFDC_USERNAME
+
+    def HUB_ORG=env.HUB_ORG_DH
+    def SFDC_HOST = env.SFDC_HOST_DH
+    def JWT_KEY_CRED_ID = "59303dba-e1e7-4bc5-85d8-6a07589c3eb9"
+    def CONNECTED_APP_CONSUMER_KEY=env.CONNECTED_APP_CONSUMER_KEY_DH
+>>>>>>> 5448d7456472fa2dbcf2eb7823aaa5d8de62a8b1
 
     println ('JWT_KEY_CRED_ID --' +JWT_KEY_CRED_ID)
     println ('HUB_ORG --' +HUB_ORG)
@@ -51,6 +62,7 @@ node {
                 println(' Deploy the code into Scratch ORG.')
                 deploymentStatus = sh returnStdout: true, script : "${toolbelt}/sfdx force:mdapi:deploy -d ./src -u ${HUB_ORG}"
             }else{
+<<<<<<< HEAD
                 println(' Deploy the code into Scratch ORG.')
                 deploymentStatus = bat returnStdout: true, script : "${toolbelt}/sfdx force:mdapi:deploy -d ./src -u ${HUB_ORG}"
             }            
@@ -69,6 +81,9 @@ node {
                 } else {
                     deploymentStatus = bat returnStdout: true, script: "${toolbelt}/sfdx force:mdapi:deploy:report -u ${HUB_ORG} --json"
                 }
+=======
+                 rc = bat returnStatus: true, script: "\"${toolbelt}\" force:auth:jwt:grant --clientid ${CONNECTED_APP_CONSUMER_KEY} --username ${HUB_ORG} --jwtkeyfile \"C:\\openssl\\bin\\server.key\" --setdefaultdevhubusername --instanceurl ${SFDC_HOST}"
+>>>>>>> 5448d7456472fa2dbcf2eb7823aaa5d8de62a8b1
             }
 
             
