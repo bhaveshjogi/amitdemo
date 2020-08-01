@@ -70,10 +70,11 @@ node {
 	while(!isDeployProcessDone){
 		println('Deployment');
 		println(deploySuccessful);
-                if (deploymentStatus.contains(deploySuccessful)){
+               // if (deploymentStatus.contains(deploySuccessful)){
                     println('Deployment Succeeded');
                     isDeployProcessDone = true;
-                } else if (deploymentStatus.contains(deployUnsuccessful)){
+              /*  } else 
+		if (deploymentStatus.contains(deployUnsuccessful)){
                     println('Deployment Did Not Succeed --' +deploymentStatus);
                     isDeployProcessDone = true;
                     error 'Deployment Did Not Succeed'
@@ -85,7 +86,7 @@ node {
                     } else {
                         deploymentStatus = bat returnStdout: true, script: "\"${toolbelt}\" force:mdapi:deploy:report -u ${HUB_ORG} --json"
                     }
-                }
+                }*/
             }   
 	 }
 	    
